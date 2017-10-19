@@ -124,17 +124,19 @@
   // stash them in hidden fields.) 
   function calc_times(control) {
     var km = control.find("input[name='km']").val();
+    var date = $("#begin_date").val() + " " + $("#begin_time").val()
+    var brevet = parseInt($("#brevet_dist_km").val())
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
     
-    $.getJSON(TIME_CALC_URL, { km: km }, 
+    $.getJSON(TIME_CALC_URL, { km: km, date: date, brevet: brevet }, 
       // response handler
       function(data) {
          var times = data.result;
          console.log("Got a response: " +  times);
          console.log("Response.open = " + times.open);
-         open_time_field.val( moment(times.open).format("ddd M/D H:mm"));
-         close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
+         open_time_field.val(times.open);
+         close_time_field.val(times.close);
        } // end of handler function
      );// End of getJSON
     }
@@ -142,19 +144,20 @@
   $(document).ready(function(){
    // Do the following when the page is finished loading
 
-      $('input[name="miles"]').change(
+      $('input[name="miles"]').keyup(
          function() {
              var miles = parseFloat($(this).val());
-             var km = (1.609344 * miles).toFixed(1) ;
+             var km = (1.609344 * miles).toFixed(1);
              console.log("Converted " + miles + " miles to " + km + " kilometers");
              var control_entry = $(this).parents(".control")
              var target = control_entry.find("input[name='km']");
              target.val( km );
              // Then calculate times for this entry
+             // TODO: Add notes if there is an error
              calc_times(control_entry);
           });
 
-      $('input[name="km"]').change(
+      $('input[name="km"]').keyup(
          function() {
              var km = parseFloat($(this).val());
              var miles = (0.621371 * km).toFixed(1) ;
@@ -163,10 +166,30 @@
              var target = control_entry.find("input[name='miles']");
              target.val( miles );
              // Then calculate times for this entry
+             // Add notes if there is an error
              calc_times(control_entry);
           });
 
-     });   // end of what we do on document ready
+      $('select[name="brevet_dist_km"]').change(
+      	function() {
+      		// TODO: Handle distance change
+      		//		 What will this change??
+      		//		 The end brevet?
+      		console.log("Change rules and check rows for new errors")
+      	});
+
+      $('input[name="begin_date"').change(
+      	function() {
+      		// TODO: Change all open and close times
+      		console.log("Change all brevet times when this happens")
+      	});
+
+      $('input[name="begin_time"]').change(
+      	function() {
+      		// TODO: Change all open and close times
+      		console.log("Change all brevet times when this happens")
+      	});
+	 });   // end of what we do on document ready
 
 </script>
 
