@@ -28,6 +28,16 @@ Reimplement the RUSA ACP controle time calculator with flask and ajax
     Note: The control location is should be used relative to the controle distance
     For example, with a 600 km controle distance the time is calculated using the speeds for 0 - 200 for the first
     200 km, then the speeds for 200 - 400 for the next 200 km, then the speeds for 400 - 600 for the last 200 km.
+    
+    Open:
+    200/34 + 200/32 + 200/30 = 18.799
+    18 hours
+    .799 * 60 = 47.941 = 48 Minutes
+    
+    
+    Close:
+    200/15 + 200/15 + 200/15 = 40
+    40 Hours
 
 ## How to use
 Create a credentials.ini file

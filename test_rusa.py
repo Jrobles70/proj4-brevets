@@ -27,7 +27,7 @@ def test_end_closure():
     assert open_time(1000, 1000, "2017-01-01 00:00") == "Mon 1/2 9:05"
     assert close_time(1000, 1000, "2017-01-01 00:00") == "Wed 1/4 3:00"
 
-def test_end_110_percent()
+def test_end_110_percent():
     assert open_time(220, 200, "2017-01-01 00:00") == "Sun 1/1 5:53"
     assert close_time(220, 200, "2017-01-01 00:00") == "Sun 1/1 13:30"
 
@@ -42,7 +42,7 @@ def test_end_110_percent()
 
     assert open_time(1100, 1000, "2017-01-01 00:00") == "Mon 1/2 9:05"
     assert close_time(1100, 1000, "2017-01-01 00:00") == "Wed 1/4 3:00"
-    
+
 def test_end_closure_too_far():
     # Testing to make sure it catches distances that are longer than 10% past the brevet distance
     assert open_time(230, 200, "2017-01-01 00:00") == ""

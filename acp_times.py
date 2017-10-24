@@ -30,7 +30,6 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time):
        An ISO 8601 format date string indicating the control open time.
        This will be in the same time zone as the brevet start time.
     """
-    # Add correct math for times
     max_speeds = {
         200: 34,
         400: 32,
@@ -38,7 +37,7 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time):
         1000: 28,
         1300: 26
     }
-
+    # Tuple = (Hours, Minutes)
     brevet_open_default = {
         200: (5, 53),
         300: (9, 0),
@@ -46,33 +45,42 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time):
         600: (18, 48),
         1000: (33, 5)
     }
+    # Make arrow obj
     control_open = arrow.get(brevet_start_time)
 
     if control_dist_km == 0:
+        # Is the starting controle
         return control_open.format("ddd M/D H:mm")
 
     if (control_dist_km >= brevet_dist_km) & (control_dist_km <= (brevet_dist_km * 1.1)):
+        # Is the final controle
         hrs, mins = brevet_open_default[brevet_dist_km]
         return control_open.shift(hours=hrs, minutes=mins).format("ddd M/D H:mm")
 
     if control_dist_km > (brevet_dist_km * 1.1):
+        # Returns nothing if its too far
         return ""
 
     control_dist_km = round(control_dist_km)
     start_time = 0
-    first_key = next (iter (max_speeds.values()))
+    first_val = next (iter (max_speeds.values()))
     last_key = 0
 
     for key in max_speeds:
         if control_dist_km > key:
+            # If controle distance is greater than the key then we can add the whole distance using those speeds
+            # I use the previous key to find the difference between the two keys
             start_time += (key - last_key) / max_speeds[key]
             last_key = key
         else:
-            if control_dist_km <= first_key:
-                start_time += control_dist_km / first_key
+            if control_dist_km <= first_val:
+                # Controle dist is less than 200 so we just need to divide by the first value
+                start_time += control_dist_km / first_val
             else:
+                # Accounts for the final kilometers
                 start_time += (control_dist_km - last_key) / max_speeds[key]
             if start_time != 0:
+                # Kept this just in case something went wrong and the start_time was 0
                 hrs = math.floor(start_time)
                 mins = round((start_time - hrs) * 60)
                 rusa = "{}H{}".format(hrs, mins)
@@ -102,7 +110,7 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
         1000: 11.428,
         1300: 13.333
     }
-
+    # Tuple = (Hours, Minutes)
     brevet_close_default = {
         200: (13, 30),
         300: (20, 0),
@@ -110,17 +118,20 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
         600: (40, 0),
         1000: (75, 0)
     }
-
+    # Make arrow obj
     control_close = arrow.get(brevet_start_time)
 
     if control_dist_km == 0:
+        # Starting controle
         return arrow.get(brevet_start_time).shift(hours=1).format("ddd M/D H:mm")
 
     if (control_dist_km >= brevet_dist_km) & (control_dist_km <= (brevet_dist_km * 1.1)):
+        # Is the final controle
         hrs, mins = brevet_close_default[brevet_dist_km]
         return control_close.shift(hours=hrs, minutes=mins).format("ddd M/D H:mm")
 
     if control_dist_km > (brevet_dist_km * 1.1):
+        # Return nothing if invalid
         return ""
 
     control_dist_km = round(control_dist_km)
@@ -132,14 +143,19 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
 
     for key in min_speeds:
         if control_dist_km > key:
+            # If controle distance is greater than the key then we can add the whole distance using those speeds
+            # I use the previous key to find the difference between the two keys
             start_time += (key - last_key) / min_speeds[key]
             last_key = key
         else:
             if control_dist_km <= first_key:
+                # Controle dist is less than 200 so we just need to divide by the first value
                 start_time += control_dist_km / first_key
             else:
+                # Accounts for the final kilometers
                 start_time += (control_dist_km - last_key) / min_speeds[key]
             if start_time != 0:
+                # Kept this just in case something went wrong and the start_time was 0
                 hrs = math.floor(start_time)
                 mins = round((start_time - hrs) * 60)
                 rusa = "{}H{}".format(hrs, mins)
