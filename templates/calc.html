@@ -90,11 +90,27 @@
    {% for row in range(20) %}
     <tr class="control">
       <!-- Dist (mi) -->
-      <td><input name="miles" type="number" 
-           min="0" max="900" size="5" /></td>
-      <!-- Dist (km) -->
-      <td><input name="km" type="text"
-	   min="0" max="1100" size="5" /> </td>
+      {% if row == 0 %}
+      		<td><input name="miles" type="number" value=0
+      		     min="0" max="900" size="5" readonly /></td>
+      		<!-- Dist (km) -->
+      		<td><input name="km" type="text"
+	  		 min="0" max="1100" size="5" value=0 readonly /> </td>
+      		<td><input name="location" type="text" 
+     			placeholder="Optional location name"
+				size="20" /> </td>
+      		<!-- Open time (read only, set by JavaScript function -->
+      		<td><input name="open" type="datetime" value="Sun 1/1 0:00" readonly /></td>
+      		<!-- Close time (read only, set by JavaScript function -->
+      		<td><input name="close" type="datetime" value="Sun 1/1 1:00" readonly /></td>
+      		<!-- Notes (error messages for this row) -->
+      		<td class="notes"> <div name="notes"></div> </td>
+	  {% else %}
+	  		<td><input name="miles" type="number" 
+      		     min="0" max="900" size="5" /></td>
+      		<!-- Dist (km) -->
+      		<td><input name="km" type="text"
+	  		 min="0" max="1100" size="5" /> </td>
       <!-- Location (optional) -->
       <td><input name="location" type="text" 
         placeholder="Optional location name"
@@ -104,7 +120,8 @@
       <!-- Close time (read only, set by JavaScript function -->
       <td><input name="close" type="datetime" value="" readonly /></td>
       <!-- Notes (error messages for this row) -->
-      <td class="notes"> &nbsp; </td>
+      <td class="notes"> <div name="notes"></div> </td>
+	  {% endif %}
     </tr>
     {% endfor %}
   </table>
@@ -116,6 +133,7 @@
 
   var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
   var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
+  var NEW_ROW;
 
   // Pass calctimes a <td> element containing the data for a control.
   // It extracts the distance and calls the server to get times to
@@ -128,28 +146,62 @@
     var brevet = parseInt($("#brevet_dist_km").val())
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
-    
+    var notes = control.find("div[name='notes']")
+    if(km > brevet * 1.1){
+    	control[0].cells[5].innerText = "Distance is too long";
+    	return
+    } else {
+    	control[0].cells[5].innerText = "";
+    }    
     $.getJSON(TIME_CALC_URL, { km: km, date: date, brevet: brevet }, 
       // response handler
       function(data) {
          var times = data.result;
          console.log("Got a response: " +  times);
          console.log("Response.open = " + times.open);
+         console.log("Response.close = " + times.close);
          open_time_field.val(times.open);
          close_time_field.val(times.close);
        } // end of handler function
      );// End of getJSON
     }
 
+    function new_field() {
+    	// If second element in list is empty then we dont need that row
+    	miles = $('input[name="miles"]')
+    	time_table = document.getElementsByClassName("control_time_table")[0]
+    	len = miles.length
+    	if (miles[len - 2].value != ""){
+    		console.log("RAN")
+    		row = time_table.insertRow(len + 1)
+    		row.innerHTML = NEW_ROW;
+    		row.className = "control"
+    	}
+    	else {
+    		time_table.deleteRow(len);
+    	}
+
+    }
+
+    function update_rows() {
+    	var rows = $('input[name="km"]');
+    	for (i = 0; i < rows.length; i++){
+    		if (rows[i].value != ""){
+    			calc_times($(rows[i]).parents(".control"));
+    		}
+    	}
+    }
+
   $(document).ready(function(){
    // Do the following when the page is finished loading
+   	  NEW_ROW = $(".control")[1].innerHTML
 
-      $('input[name="miles"]').keyup(
+      $('input[name="miles"]').change(
          function() {
              var miles = parseFloat($(this).val());
              var km = (1.609344 * miles).toFixed(1);
              console.log("Converted " + miles + " miles to " + km + " kilometers");
-             var control_entry = $(this).parents(".control")
+             var control_entry = $(this).parents(".control");
              var target = control_entry.find("input[name='km']");
              target.val( km );
              // Then calculate times for this entry
@@ -157,7 +209,7 @@
              calc_times(control_entry);
           });
 
-      $('input[name="km"]').keyup(
+      $('input[name="km"]').change(
          function() {
              var km = parseFloat($(this).val());
              var miles = (0.621371 * km).toFixed(1) ;
@@ -170,24 +222,24 @@
              calc_times(control_entry);
           });
 
-      $('select[name="brevet_dist_km"]').change(
+      $('select[name="distance"]').change(
       	function() {
       		// TODO: Handle distance change
       		//		 What will this change??
       		//		 The end brevet?
-      		console.log("Change rules and check rows for new errors")
+      		update_rows()
       	});
 
       $('input[name="begin_date"').change(
       	function() {
       		// TODO: Change all open and close times
-      		console.log("Change all brevet times when this happens")
+      		update_rows()
       	});
 
       $('input[name="begin_time"]').change(
       	function() {
       		// TODO: Change all open and close times
-      		console.log("Change all brevet times when this happens")
+      		update_rows()
       	});
 	 });   // end of what we do on document ready
 

@@ -71,7 +71,7 @@ def _calc_times():
   #FIXME: These probably aren't the right open and close times
   open_time = acp_times.open_time(km, brevet, arrow.get(date).isoformat())
   close_time = acp_times.close_time(km, brevet, arrow.get(date).isoformat())
-  result={ "open": open_time, "close": close_time }
+  result={ "open": open_time, "close": close_time,  }
   return jsonify(result=result)
 
 
