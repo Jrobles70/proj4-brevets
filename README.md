@@ -2,47 +2,64 @@
 
 Reimplement the RUSA ACP controle time calculator with flask and ajax
 
-## ACP controle times
+## ACP Rules
+* The first controle must be at the 0 miles, 0 km
+* Riders have one hour to go through the first controle
+* The final controle must be greater than or equal to the brevet distance and less than or equal to the brevet distance * 1.1
+* The final controle will always have the following time limits
+    *13:30 for 200 KM
+    *20:00 for 300 KM
+    *27:00 for 400 KM
+    *40:00 for 600 KM
+    *75:00 for 1000 KM
+* Times are calculated using the kilometers rounded to the next kilometer
+* Times are also rounded to the next minute
 
-That's "controle" with an 'e', because it's French, although "control"
-is also accepted.  Controls are points where   
-a rider must obtain proof of passage, and control[e] times are the
-minimum and maximum times by which the rider must  
-arrive at the location.   
+* The following speeds are used to calculate the open and closed times:
 
-The algorithm for calculating controle times is described at
-https://rusa.org/octime_alg.html . The description is ambiguous,
-but the examples help.  Part of finishing this project is clarifying
-anything that is not clear about the requirements, and documenting it
-clearly.  
+    | Controle location (km) | Minimum Speed (km/hr) | Maximum Speed (km/hr) |
+    | ------------------------ | --------------------------- | ----------------------------- |
+    | 0 - 200 | 15 | 34 |
+    | 200 - 400 | 15 | 32 |
+    | 400 - 600 | 15 | 30 |
+    | 600 - 1000 | 11.428 | 28 |
+    | 1000 - 1300 | 13.333 | 26 |
+    
+    Note: The control location is should be used relative to the controle distance
+    For example, with a 600 km controle distance the time is calculated using the speeds for 0 - 200 for the first
+    200 km, then the speeds for 200 - 400 for the next 200 km, then the speeds for 400 - 600 for the last 200 km.
 
-We are essentially replacing the calculator at
-https://rusa.org/octime_acp.html .  We can also use that calculator
-to clarify requirements and develop test data.  
-
-## AJAX and Flask reimplementation
-
-The current RUSA controle time calculator is a Perl script that takes
-an HTML form and emits a text page. The reimplementation will fill in
-times as the input fields are filled.  Each time a distance is filled
-in, the corresponding open and close times should be filled in.   
-
-I will leave much of the design to you.   
+## How to use
+Create a credentials.ini file
+Using command line to run
+```
+make run
+```
 
 ## Testing
 
-A suite of nose test cases is a requirement of this project.  Design
-the test cases based on an interpretation of rules at
-https://rusa.org/octime_alg.html .  Be sure to test your test
-cases:  You can use the current brevet time calculator (
-https://rusa.org/octime_acp.html ) to check that your expected test
-outputs are correct. While checking these values once is a manual
-operation, re-running your test cases should be automated in the usual
-manner as a Nose test suite.
+* `nosetests`
+```
+make test
+```
 
-To make automated testing more practical, your open and close time
-calculations should be in a separate module.  Because I want to be 
-able to use my test suite as well as yours, I will require that 
-module be named acp_times.py and contain the two functions I have 
-included in the skeleton code (though revised, of course, to 
-return correct results). 
+
+A simple anagram game designed for English-language learning students in
+elementary and middle school.
+Students are presented with a list of vocabulary words (taken from a text file)
+and an anagram.  The anagram is a jumble of some number of vocabulary words, randomly chosen.  Students attempt to type vocabularly words that can be created from the
+jumble.  When a matching word is typed, it is added to a list of solved words.
+
+The vocabulary word list is fixed for one invocation of the server, so multiple
+students connected to the same server will see the same vocabulary list but may
+have different anagrams.
+
+## Known bugs
+If a km or miles number is deleted then the other number will go to NaN
+
+
+## Authors
+
+Initial version by M Young;
+Revised by Justin Robles jrobles@uoregon.edu
+
